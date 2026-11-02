@@ -39,7 +39,8 @@ public class FontChoiceTest {
 
     @Test
     public void prefKeyIsStable() {
-        assertEquals("look_font", FontChoice.PREF_KEY);
+        assertEquals("font", FontChoice.PREF_KEY);
+        assertEquals(LookPrefs.FONT, FontChoice.PREF_KEY);
     }
 
     @Test

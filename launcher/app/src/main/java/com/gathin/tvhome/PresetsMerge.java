@@ -14,7 +14,7 @@ final class PresetsMerge {
     static final List<String> LAYOUTS = Arrays.asList("dock", "cards", "classic", "sidebar");
     static final List<String> THEMES = Arrays.asList("calm", "glass", "midnight", "ember", "mono");
     static final List<String> DARK_MODES = Arrays.asList("off", "on", "auto");
-    static final List<String> FONTS = Arrays.asList("outfit", "manrope", "jakarta", "dmsans", "theme");
+    static final List<String> FONTS = FontChoice.IDS;
 
     static final String DEFAULT_LAYOUT = "classic";
     static final String DEFAULT_THEME = "calm";

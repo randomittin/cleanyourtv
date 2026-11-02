@@ -83,6 +83,7 @@
         <intent>
             <action android:name="com.novalauncher.THEME" />
         </intent>
+        <package android:name="io.github.randomittin.voiceassistant" />
     </queries>
 
     <application

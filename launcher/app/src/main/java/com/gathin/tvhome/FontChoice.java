@@ -12,13 +12,13 @@ import java.util.Locale;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * The UI font the user picked (pref {@value #PREF_KEY} in the launcher settings), and the Typeface for each
+ * The UI font the user picked (pref {@value #PREF_KEY} in the {@value Presets#LOOK_PREFS} prefs file, written by LookPrefs), and the Typeface for each
  * role of it. Outfit is the default and keeps the existing res/font family XMLs untouched; every other family is
  * one bundled variable TTF, weighted per role. Parsing and role mapping are pure (JVM-tested); only
  * {@link #typeface} touches Android.
  */
 final class FontChoice {
-    static final String PREF_KEY = "look_font";
+    static final String PREF_KEY = "font";
     static final String OUTFIT = "outfit";
     static final String INTER = "inter";
     static final String MANROPE = "manrope";
@@ -79,7 +79,7 @@ final class FontChoice {
     }
 
     static String current(Context context) {
-        SharedPreferences prefs = context.getSharedPreferences(Config.SETTINGS_NAME, Context.MODE_PRIVATE);
+        SharedPreferences prefs = context.getSharedPreferences(Presets.LOOK_PREFS, Context.MODE_PRIVATE);
         return parse(prefs.getString(PREF_KEY, OUTFIT));
     }
 

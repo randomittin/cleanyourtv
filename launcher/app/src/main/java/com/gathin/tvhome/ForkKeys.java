@@ -18,7 +18,7 @@ final class ForkKeys {
     /** "off" | "on" | "auto". */
     final String darkMode;
     final int darkFromHour, darkToHour;
-    /** "outfit" | "manrope" | "jakarta" | "dmsans" | "theme". */
+    /** One of {@link FontChoice#IDS}. */
     final String font;
     /** "" = the launcher's default tiles. */
     final String iconPack;

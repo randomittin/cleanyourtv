@@ -10,9 +10,11 @@ public class LookPrefsTest {
         assertTrue(LookPrefs.valid("layout", "dock"));
         assertTrue(LookPrefs.valid("theme_preset", "midnight"));
         assertTrue(LookPrefs.valid("dark_mode", "auto"));
-        assertTrue(LookPrefs.valid("font", "jakarta"));
+        assertTrue(LookPrefs.valid("font", "plusjakartasans"));
         assertFalse(LookPrefs.valid("layout", "grid"));
         assertFalse(LookPrefs.valid("font", "comic"));
+        assertFalse(LookPrefs.valid("font", "jakarta"));
+        assertTrue(LookPrefs.valid("font", "inter"));
         assertFalse(LookPrefs.valid("unknown", "x"));
         assertFalse(LookPrefs.valid(null, "x"));
         assertFalse(LookPrefs.valid("layout", null));
