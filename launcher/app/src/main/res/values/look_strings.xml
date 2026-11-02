@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="look_title" translatable="false">Look</string>
+    <string name="look_row_layout" translatable="false">Layout</string>
+    <string name="look_row_theme" translatable="false">Theme</string>
+    <string name="look_row_dark" translatable="false">Dark mode</string>
+    <string name="look_row_font" translatable="false">Font</string>
+    <string name="look_row_icons" translatable="false">Icon pack</string>
+    <string name="look_reset" translatable="false">Reset look</string>
+    <string name="look_icons_default" translatable="false">Default</string>
+
+    <string-array name="look_layout_ids" translatable="false">
+        <item>classic</item>
+        <item>dock</item>
+        <item>cards</item>
+        <item>sidebar</item>
+    </string-array>
+    <string-array name="look_layout_labels" translatable="false">
+        <item>Classic</item>
+        <item>Dock</item>
+        <item>Cards</item>
+        <item>Sidebar</item>
+    </string-array>
+
+    <string-array name="look_theme_ids" translatable="false">
+        <item>calm</item>
+        <item>glass</item>
+        <item>midnight</item>
+        <item>ember</item>
+        <item>mono</item>
+    </string-array>
+    <string-array name="look_theme_labels" translatable="false">
+        <item>Calm</item>
+        <item>Glass</item>
+        <item>Midnight</item>
+        <item>Ember</item>
+        <item>Mono</item>
+    </string-array>
+
+    <string-array name="look_dark_ids" translatable="false">
+        <item>off</item>
+        <item>on</item>
+        <item>auto</item>
+    </string-array>
+    <string-array name="look_dark_labels" translatable="false">
+        <item>Off</item>
+        <item>On</item>
+        <item>Auto</item>
+    </string-array>
+
+    <!-- Ids are the ones ForkKeys / PresetsMerge.FONTS accept for the "font" pick. -->
+    <string-array name="look_font_ids" translatable="false">
+        <item>outfit</item>
+        <item>manrope</item>
+        <item>jakarta</item>
+        <item>dmsans</item>
+        <item>theme</item>
+    </string-array>
+    <string-array name="look_font_labels" translatable="false">
+        <item>Outfit</item>
+        <item>Manrope</item>
+        <item>Plus Jakarta Sans</item>
+        <item>DM Sans</item>
+        <item>Theme font</item>
+    </string-array>
+</resources>
