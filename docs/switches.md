@@ -69,3 +69,4 @@ rule sit on its wanted list until a screenshot arrives.
 | `clock_format` | <img src="switches/clock_format.jpg" width="320" alt="clock_format on a TV"> |
 | `glow_snap` | <img src="switches/glow_snap.jpg" width="320" alt="glow_snap on a TV: the glow in Netflix red behind the dock"> |
 | `icon_pack` | <img src="switches/icon_pack.jpg" width="320" alt="icon_pack on a TV: tiles drawn by the Minimal icon pack, a letter on a rounded square"> |
+| `dock_title_style` | <img src="switches/dock_title_style.jpg" width="320" alt="dock_title_style pill on a TV: the focused app name in a small dark pill above the dock"> |
