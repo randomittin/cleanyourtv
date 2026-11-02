@@ -17,7 +17,14 @@ final class UiFont {
         TypedValue value = new TypedValue();
         res.getValue(fontString, value, true);
         String name = String.valueOf(value.string);
-        if (name.startsWith("res/")) return res.getFont(value.resourceId);
+        if (name.startsWith("res/")) {
+            FontChoice.Role role = FontChoice.roleForOutfitResource(value.resourceId);
+            if (role != null) {
+                Typeface chosen = FontChoice.typeface(context, FontChoice.current(context), role);
+                if (chosen != null) return chosen;
+            }
+            return res.getFont(value.resourceId);
+        }
         return Typeface.create(name, Typeface.NORMAL);
     }
 }
