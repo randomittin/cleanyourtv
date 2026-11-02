@@ -1,0 +1,18 @@
+# Apps the pack draws an icon for: `package/activity`, then an optional label whose first letter is the
+# monogram (otherwise the last word of the package). A leading dot on the activity means "package + dot".
+# Activity names were seen on Android TV and Google TV boxes and vary by app version and by TV; an app that
+# does not match keeps its own icon. Find the right one on your TV with:
+#   adb shell cmd package resolve-activity --brief -c android.intent.category.LEANBACK_LAUNCHER <package>
+# Names here are not verified on every TV. A line is `#` comment, blank, or an entry.
+com.netflix.ninja/.MainActivity Netflix
+com.google.android.youtube.tv/com.google.android.apps.youtube.tv.activity.ShellActivity YouTube
+com.amazon.amazonvideo.livingroom/com.amazon.ignition.IgnitionActivity Prime Video
+com.disney.disneyplus/com.bamtechmedia.dominguez.main.MainActivity Disney+
+in.startv.hotstar/.splash.SplashActivity Hotstar
+com.apple.atve.androidtv.appletv/.MainActivity Apple TV
+com.spotify.tv.android/.SpotifyTVActivity Spotify
+com.plexapp.android/com.plexapp.plex.activities.tv17.MainActivity Plex
+org.xbmc.kodi/.Splash Kodi
+org.videolan.vlc/.StartActivity VLC
+com.android.vending/com.google.android.finsky.tvmainactivity.TvMainActivity Play Store
+com.android.tv.settings/.MainSettings Settings
