@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The TV banner: a microphone with sound arcs on a dark panel. Drawn for this add-on, no third-party art. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="320dp" android:height="180dp"
+    android:viewportWidth="320" android:viewportHeight="180">
+    <path android:fillColor="#FF10151B" android:pathData="M0,0h320v180h-320z" />
+    <path android:fillColor="#FF7DB8FF" android:pathData="M148,40h24a12,12 0,0 1,12 12v44a12,12 0,0 1,-12 12h-24a12,12 0,0 1,-12 -12v-44a12,12 0,0 1,12 -12z" />
+    <path android:strokeColor="#FF7DB8FF" android:strokeWidth="6" android:strokeLineCap="round"
+        android:pathData="M122,92a38,38 0,0 0,76 0" />
+    <path android:strokeColor="#FF7DB8FF" android:strokeWidth="6" android:strokeLineCap="round"
+        android:pathData="M160,130v18M140,148h40" />
+</vector>
