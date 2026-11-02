@@ -435,6 +435,13 @@ final class Config {
         return ctx.getExternalFilesDir(null);
     }
 
+    /** The theme overlay as {@link #load} first sees it (before the fork presets), for ForkKeys. */
+    static JSONObject overlay(Context ctx) {
+        File dir = dir(ctx);
+        File file = dir != null ? new File(dir, FILE_NAME) : null;
+        return readOverlay(ctx, file, Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()));
+    }
+
     static Config load(Context ctx) {
         Resources res = ctx.getResources();
         List<String> dock = new ArrayList<>(Arrays.asList(res.getStringArray(R.array.dock_apps)));
@@ -551,6 +558,7 @@ final class Config {
         File file = dir != null ? new File(dir, FILE_NAME) : null;
         boolean mounted = Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState());
         JSONObject json = readOverlay(ctx, file, mounted);
+        json = Presets.apply(ctx, json);
         if (json != null) {
             applied = true;
             dock = stringList(json, "dock_apps", dock);
@@ -705,6 +713,12 @@ final class Config {
             wallpapers.addAll(chosen);
             wallpaper = chosen.isEmpty() ? null : chosen.get(0);
             wallpaperEnabled = !chosen.isEmpty();
+        }
+        // Dark mode (fork) shows no wallpaper, whatever was picked on the TV.
+        if (json != null && bool(json, PresetsMerge.DARK_ACTIVE_KEY, false)) {
+            wallpapers.clear();
+            wallpaper = null;
+            wallpaperEnabled = false;
         }
         // A festive skin comes only from a theme; config.xml has no festival. seasonal_skin names one the same way
         // but launchers before it ignore the key, so a theme can carry it without older ones showing the diya skin.
