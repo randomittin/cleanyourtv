@@ -64,6 +64,7 @@ public class AssistActivity extends Activity {
         super.onCreate(savedInstanceState);
         settings = new Settings(this);
         clients = new Clients(settings);
+        BrainIdentity.apply(this);
         buildUi();
         tts = new TextToSpeech(this, status -> {
             ttsReady = status == TextToSpeech.SUCCESS;
@@ -339,6 +340,7 @@ public class AssistActivity extends Activity {
         }
         settings.setBrain(Settings.BRAIN_CLAUDE.equals(settings.brain())
                 ? Settings.BRAIN_CHATGPT : Settings.BRAIN_CLAUDE);
+        BrainIdentity.apply(this);
         refreshBrain();
     }
 

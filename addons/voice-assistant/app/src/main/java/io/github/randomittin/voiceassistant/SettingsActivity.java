@@ -36,6 +36,7 @@ public class SettingsActivity extends Activity {
     }
 
     private void render() {
+        BrainIdentity.apply(this);
         list.removeAllViews();
         TextView title = new TextView(this);
         title.setText("Voice Assistant settings");

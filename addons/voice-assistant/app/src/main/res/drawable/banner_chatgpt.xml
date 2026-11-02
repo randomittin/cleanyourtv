@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Banner for the ChatGPT alias: a plain chat bubble, drawn for this add-on. Not a brand logo; a private build can replace it (see the README). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="320dp" android:height="180dp"
+    android:viewportWidth="320" android:viewportHeight="180">
+    <path android:fillColor="#FF10151B" android:pathData="M0,0h320v180h-320z" />
+    <path android:fillColor="#FF3DD6A5" android:pathData="M110,44h100a16,16 0,0 1,16 16v48a16,16 0,0 1,-16 16h-60l-26,24v-24h-14a16,16 0,0 1,-16 -16v-48a16,16 0,0 1,16 -16z" />
+    <path android:fillColor="#FF10151B" android:pathData="M136,84m-8,0a8,8 0,1 1,16 0a8,8 0,1 1,-16 0" />
+    <path android:fillColor="#FF10151B" android:pathData="M160,84m-8,0a8,8 0,1 1,16 0a8,8 0,1 1,-16 0" />
+    <path android:fillColor="#FF10151B" android:pathData="M184,84m-8,0a8,8 0,1 1,16 0a8,8 0,1 1,-16 0" />
+</vector>

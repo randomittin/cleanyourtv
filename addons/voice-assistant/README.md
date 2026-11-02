@@ -29,6 +29,25 @@ setting: `auto` (the default) uses Deepgram when its key is set and OpenAI other
 
 Pressing the mic button again while it listens counts as OK.
 
+## It shows up as the brain you connected
+
+With Claude selected and its key set, the launcher tile (and the Clean Your TV card) reads "Claude" with its own
+icon and banner; with ChatGPT selected and its key set, "ChatGPT"; otherwise "Voice Assistant". The overlay's
+title shows the brain too. This is done with three `activity-alias` entries that all point at `.AssistActivity`
+(`.LauncherDefault`, `.LauncherClaude`, `.LauncherChatGpt`), exactly one enabled at a time. `BrainIdentity.apply()`
+switches them whenever the brain or a key changes (settings, `.SetupActivity`, Left/Right in the overlay), with
+`PackageManager.setComponentEnabledSetting(..., DONT_KILL_APP)`, so no permission is needed. The launcher may take
+a moment to redraw the tile. Each alias has its own card file (`module_card*.xml`); a changed card label makes
+Clean Your TV ask once more whether to show it.
+
+`.AssistActivity` itself stays the fixed target for the mic button and the assistant setting, whichever name the
+tile has: `io.github.randomittin.voiceassistant/.AssistActivity`.
+
+The art here is plain and drawn for this add-on: a sparkle (`icon_claude`, `banner_claude`) and a chat bubble
+(`icon_chatgpt`, `banner_chatgpt`), never the companies' logos, which this repository does not accept. For a build
+you keep to yourself you can swap those four drawables in `app/src/main/res/drawable/` (keep the names, 320x180 for the
+banners) for whatever you are licensed to use, and build as usual.
+
 ## Opening it from the remote's mic button
 
 The activity answers `android.intent.action.ASSIST`, `VOICE_COMMAND`, `android.speech.action.WEB_SEARCH` and
@@ -55,7 +74,10 @@ adb shell am start -n io.github.randomittin.voiceassistant/.SetupActivity \
   --es anthropic_key "$ANTHROPIC_API_KEY" --es deepgram_key "$DEEPGRAM_API_KEY" --es stt auto --es brain claude
 ```
 
-Without extras, `.SetupActivity` just opens the settings screen. `openai_key` works the same way. `brain` is `claude` or `chatgpt`; `stt` is `auto`, `deepgram` or `openai`. The keys pass
+`.SetupActivity` is protected by `android.permission.DUMP`, which the adb shell holds and ordinary apps cannot get,
+so only `adb shell am start` (or root) can use it; another app on the TV cannot overwrite your keys or switch the
+brain. The on-TV settings screen is started from inside this app and is not affected. Without extras, `.SetupActivity`
+just opens the settings screen. `openai_key` works the same way. `brain` is `claude` or `chatgpt`; `stt` is `auto`, `deepgram` or `openai`. The keys pass
 through the adb shell's command line, so they can show up in its history on the TV; use a key you can revoke.
 
 Without a Deepgram or an OpenAI key the panel says speech-to-text needs one and offers a typed question instead (OK, then the
