@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="520dp"
+    android:layout_height="96dp"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:padding="12dp"
+    android:background="@drawable/np_card_bg"
+    android:visibility="gone">
+
+    <ImageView
+        android:id="@+id/npArt"
+        android:layout_width="72dp"
+        android:layout_height="72dp"
+        android:background="@drawable/np_art_bg"
+        android:scaleType="centerCrop"
+        android:contentDescription="@null" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_marginStart="14dp"
+        android:layout_marginEnd="8dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/npTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="#FFFFFFFF"
+            android:textSize="16sp"
+            android:singleLine="true"
+            android:ellipsize="end" />
+
+        <TextView
+            android:id="@+id/npArtist"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="#B3FFFFFF"
+            android:textSize="13sp"
+            android:singleLine="true"
+            android:ellipsize="end" />
+
+        <LinearLayout
+            android:id="@+id/npProgressRow"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/npElapsed"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minWidth="34dp"
+                android:textColor="#99FFFFFF"
+                android:textSize="11sp" />
+
+            <ProgressBar
+                android:id="@+id/npProgress"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="0dp"
+                android:layout_height="4dp"
+                android:layout_weight="1"
+                android:layout_marginStart="6dp"
+                android:layout_marginEnd="6dp"
+                android:max="1000"
+                android:progressDrawable="@drawable/np_progress" />
+
+            <TextView
+                android:id="@+id/npTotal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minWidth="34dp"
+                android:gravity="end"
+                android:textColor="#99FFFFFF"
+                android:textSize="11sp" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <ImageButton
+        android:id="@+id/npPrev"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:background="@drawable/input_row_bg"
+        android:src="@drawable/np_ic_prev"
+        android:tint="@drawable/pill_text"
+        android:focusable="true"
+        android:contentDescription="@string/np_prev" />
+
+    <ImageButton
+        android:id="@+id/npPlayPause"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="2dp"
+        android:layout_marginEnd="2dp"
+        android:background="@drawable/input_row_bg"
+        android:src="@drawable/np_ic_pause"
+        android:tint="@drawable/pill_text"
+        android:focusable="true"
+        android:contentDescription="@string/np_play_pause" />
+
+    <ImageButton
+        android:id="@+id/npNext"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:background="@drawable/input_row_bg"
+        android:src="@drawable/np_ic_next"
+        android:tint="@drawable/pill_text"
+        android:focusable="true"
+        android:contentDescription="@string/np_next" />
+</LinearLayout>

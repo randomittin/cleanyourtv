@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string translatable="false" name="np_prev">Previous</string>
+    <string translatable="false" name="np_play_pause">Play or pause</string>
+    <string translatable="false" name="np_next">Next</string>
+    <string translatable="false" name="np_unknown_title">Unknown title</string>
+</resources>
