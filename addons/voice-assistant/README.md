@@ -74,7 +74,10 @@ adb shell am start -n io.github.randomittin.voiceassistant/.SetupActivity \
   --es anthropic_key "$ANTHROPIC_API_KEY" --es deepgram_key "$DEEPGRAM_API_KEY" --es stt auto --es brain claude
 ```
 
-Without extras, `.SetupActivity` just opens the settings screen. `openai_key` works the same way. `brain` is `claude` or `chatgpt`; `stt` is `auto`, `deepgram` or `openai`. The keys pass
+`.SetupActivity` is protected by `android.permission.DUMP`, which the adb shell holds and ordinary apps cannot get,
+so only `adb shell am start` (or root) can use it; another app on the TV cannot overwrite your keys or switch the
+brain. The on-TV settings screen is started from inside this app and is not affected. Without extras, `.SetupActivity`
+just opens the settings screen. `openai_key` works the same way. `brain` is `claude` or `chatgpt`; `stt` is `auto`, `deepgram` or `openai`. The keys pass
 through the adb shell's command line, so they can show up in its history on the TV; use a key you can revoke.
 
 Without a Deepgram or an OpenAI key the panel says speech-to-text needs one and offers a typed question instead (OK, then the

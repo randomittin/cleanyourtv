@@ -114,10 +114,12 @@
             android:screenOrientation="landscape"
             android:theme="@android:style/Theme.Material.NoActionBar.Fullscreen" />
 
-        <!-- Provisioning over ADB with extras: see the README. -->
+        <!-- Provisioning over ADB with extras: see the README. Guarded by DUMP, which the adb shell holds and
+             ordinary apps cannot get, so no other app can overwrite the keys or switch the brain. -->
         <activity
             android:name=".SetupActivity"
             android:exported="true"
+            android:permission="android.permission.DUMP"
             android:screenOrientation="landscape"
             android:theme="@android:style/Theme.Material.NoActionBar.Fullscreen" />
     </application>
