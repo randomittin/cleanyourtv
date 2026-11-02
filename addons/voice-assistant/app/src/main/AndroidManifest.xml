@@ -24,15 +24,6 @@
             android:exported="true"
             android:launchMode="singleTop"
             android:screenOrientation="landscape">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
-            </intent-filter>
-            <!-- Clean Your TV module card (docs/specs/card.md): the tile shows as "Voice Assistant" once the owner says Show. -->
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="com.gathin.tvhome.category.DOCK_CARD" />
-            </intent-filter>
             <!-- The remote's mic button and the system's other "ask" entry points. -->
             <intent-filter>
                 <action android:name="android.intent.action.ASSIST" />
@@ -50,8 +41,71 @@
                 <action android:name="android.intent.action.SEARCH_LONG_PRESS" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
-            <meta-data android:name="com.gathin.tvhome.card" android:resource="@xml/module_card" />
         </activity>
+
+        <!-- The launcher tile. Exactly one of the three aliases is enabled: BrainIdentity switches them so the app shows as the connected brain. -->
+        <!-- Neutral name, until a brain is connected. -->
+        <activity-alias
+            android:name=".LauncherDefault"
+            android:enabled="true"
+            android:exported="true"
+            android:icon="@drawable/icon"
+            android:banner="@drawable/banner"
+            android:label="Voice Assistant"
+            android:targetActivity=".AssistActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
+            </intent-filter>
+            <!-- Clean Your TV module card (docs/specs/card.md). -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.gathin.tvhome.category.DOCK_CARD" />
+            </intent-filter>
+            <meta-data android:name="com.gathin.tvhome.card" android:resource="@xml/module_card" />
+        </activity-alias>
+
+        <!-- Enabled when Claude is selected and its key is set. -->
+        <activity-alias
+            android:name=".LauncherClaude"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@drawable/icon_claude"
+            android:banner="@drawable/banner_claude"
+            android:label="Claude"
+            android:targetActivity=".AssistActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
+            </intent-filter>
+            <!-- Clean Your TV module card (docs/specs/card.md). -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.gathin.tvhome.category.DOCK_CARD" />
+            </intent-filter>
+            <meta-data android:name="com.gathin.tvhome.card" android:resource="@xml/module_card_claude" />
+        </activity-alias>
+
+        <!-- Enabled when ChatGPT is selected and its key is set. -->
+        <activity-alias
+            android:name=".LauncherChatGpt"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@drawable/icon_chatgpt"
+            android:banner="@drawable/banner_chatgpt"
+            android:label="ChatGPT"
+            android:targetActivity=".AssistActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
+            </intent-filter>
+            <!-- Clean Your TV module card (docs/specs/card.md). -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.gathin.tvhome.category.DOCK_CARD" />
+            </intent-filter>
+            <meta-data android:name="com.gathin.tvhome.card" android:resource="@xml/module_card_chatgpt" />
+        </activity-alias>
 
         <activity
             android:name=".SettingsActivity"

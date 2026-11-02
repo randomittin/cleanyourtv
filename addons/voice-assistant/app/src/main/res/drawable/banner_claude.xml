@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Banner for the Claude alias: a plain sparkle, drawn for this add-on. Not a brand logo; a private build can replace it (see the README). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="320dp" android:height="180dp"
+    android:viewportWidth="320" android:viewportHeight="180">
+    <path android:fillColor="#FF10151B" android:pathData="M0,0h320v180h-320z" />
+    <path android:fillColor="#FFE8A33D" android:pathData="M160,30 C164,64 172,80 204,90 C172,100 164,116 160,150 C156,116 148,100 116,90 C148,80 156,64 160,30z" />
+    <path android:fillColor="#FFF3C98B" android:pathData="M232,44 C233.5,56 236,61 247,64 C236,67 233.5,72 232,84 C230.5,72 228,67 217,64 C228,61 230.5,56 232,44z" />
+    <path android:fillColor="#FFF3C98B" android:pathData="M96,112 C97,120 99,123 106,125 C99,127 97,130 96,138 C95,130 93,127 86,125 C93,123 95,120 96,112z" />
+</vector>

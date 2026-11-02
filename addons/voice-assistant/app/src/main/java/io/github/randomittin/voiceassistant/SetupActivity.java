@@ -79,6 +79,8 @@ public class SetupActivity extends Activity {
                 .append(" (using ").append(SttProvider.label(settings.sttProvider())).append(")")
                 .append("\nBrain: ").append(Settings.brainLabel(settings.brain()));
 
+        BrainIdentity.apply(this);
+
         TextView view = new TextView(this);
         view.setText(saved.toString());
         view.setTextSize(30);

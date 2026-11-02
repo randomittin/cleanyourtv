@@ -388,7 +388,14 @@ def declaration_problems(card_path):
             reasons.append("the card meta-data sits on <application>, and Cards.read() loads it with "
                            "loadXmlMetaData() off the activity that answers the card query")
 
-    carriers = card_carriers(application)
+    all_carriers = card_carriers(application)
+    # An <activity-alias> shipped android:enabled="false" is an alternate tile the app switches on
+    # itself, in place of the enabled one (voice-assistant shows as the connected brain). PackageManager's
+    # card query returns only enabled components, so an alternate is never a second card; it is still
+    # held to the rest of the declaration below.
+    alternates = [e for e in all_carriers
+                  if e.tag == "activity-alias" and e.get(MANIFEST_ANDROID + "enabled") == "false"]
+    carriers = [e for e in all_carriers if e not in alternates]
     wanted = "@xml/" + card_path.stem
     if not carriers:
         return reasons + ["no element carries <meta-data android:name=\"%s\">, so the card this folder "
@@ -397,6 +404,22 @@ def declaration_problems(card_path):
         reasons.append("%d elements carry the card meta-data (%s), and Cards.read() answers "
                        "'declares a second card; one per package is read' for the second"
                        % (len(carriers), ", ".join(named(e) for e in carriers)))
+
+    for element in alternates:
+        name = named(element)
+        if element.get(MANIFEST_ANDROID + "exported") != "true":
+            reasons.append("%s is not android:exported=\"true\", and Cards.read() answers 'card activity "
+                           "is not exported and enabled' once it is enabled" % name)
+        if not carries(element, MAIN_ACTION, DOCK_CARD) or not carries(element, MAIN_ACTION, LEANBACK_CATEGORY):
+            reasons.append("%s is an alternate card tile without both its MAIN + %s and MAIN + %s "
+                           "filters" % (name, DOCK_CARD, LEANBACK_CATEGORY))
+        for meta in element.findall("meta-data"):
+            if meta.get(MANIFEST_ANDROID + "name") != CARD_META_DATA:
+                continue
+            resource = meta.get(MANIFEST_ANDROID + "resource") or ""
+            if not resource.startswith("@xml/") or not (card_path.parent / (resource[5:] + ".xml")).is_file():
+                reasons.append("the meta-data on %s names %r, which this folder does not ship"
+                               % (name, resource))
 
     for element in carriers:
         name = named(element)
@@ -431,7 +454,7 @@ def declaration_problems(card_path):
     # The other direction: a second activity that answers the card query with no meta-data is asked
     # for a card on every Home and logged against ('no <meta-data ...>'), and never shows one.
     for element in application:
-        if element.tag not in ACTIVITY_TAGS or element in carriers:
+        if element.tag not in ACTIVITY_TAGS or element in all_carriers:
             continue
         if carries(element, MAIN_ACTION, DOCK_CARD):
             reasons.append("%s carries MAIN + %s and no card meta-data, so it is queried for a card "
@@ -500,6 +523,40 @@ class DeclarationReaderTest(unittest.TestCase):
         reasons = self.check(self.manifest(activity))
         self.assertEqual(len(reasons), 1, reasons)
         self.assertIn('android:enabled="false"', reasons[0])
+
+    ALIAS = ('<activity-alias android:name=".Alt" android:exported="true" android:enabled="false" '
+             'android:targetActivity=".Main">'
+             '<intent-filter><action android:name="android.intent.action.MAIN" />'
+             '<category android:name="android.intent.category.LEANBACK_LAUNCHER" /></intent-filter>'
+             '<intent-filter><action android:name="android.intent.action.MAIN" />'
+             '<category android:name="com.gathin.tvhome.category.DOCK_CARD" /></intent-filter>'
+             '<meta-data android:name="com.gathin.tvhome.card" android:resource="@xml/%s" />'
+             '</activity-alias>')
+
+    def check_with_alias(self, alias, extra_card=None):
+        with tempfile.TemporaryDirectory() as tmp:
+            addon = Path(tmp) / "demo"
+            xml_folder = addon / "app/src/main/res/xml"
+            xml_folder.mkdir(parents=True)
+            (xml_folder / "module_card.xml").write_text(self.CARD, encoding="utf-8")
+            if extra_card:
+                (xml_folder / (extra_card + ".xml")).write_text(self.CARD, encoding="utf-8")
+            (addon / "app/src/main/AndroidManifest.xml").write_text(
+                self.manifest(self.TILE, extra=alias), encoding="utf-8")
+            return declaration_problems(xml_folder / "module_card.xml")
+
+    def test_a_disabled_alias_with_its_own_card_is_an_alternate_not_a_second_card(self):
+        self.assertEqual(self.check_with_alias(self.ALIAS % "module_card_alt", "module_card_alt"), [])
+
+    def test_a_disabled_alias_naming_a_card_that_is_not_shipped_is_named(self):
+        reasons = self.check_with_alias(self.ALIAS % "module_card_missing")
+        self.assertEqual(len(reasons), 1, reasons)
+        self.assertIn("does not ship", reasons[0])
+
+    def test_an_enabled_second_alias_is_still_a_second_card(self):
+        reasons = self.check_with_alias((self.ALIAS % "module_card_alt").replace(' android:enabled="false"', ""),
+                                        "module_card_alt")
+        self.assertTrue(any("second card" in r for r in reasons), reasons)
 
     def test_a_disabled_application_is_named(self):
         reasons = self.check(self.manifest(self.TILE, ' android:enabled="false"'))
