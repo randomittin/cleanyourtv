@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
+    <string name="side_home">Home</string>
+    <string name="side_inputs">Inputs</string>
+    <string name="side_look">Look</string>
+    <string name="side_assistant">Assistant</string>
+    <string name="side_settings">Settings</string>
+</resources>
