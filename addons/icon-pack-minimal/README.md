@@ -77,4 +77,4 @@ python3 -m unittest tests.test_icon_pack_minimal
 None. The manifest has no `uses-permission`, no network access, no service and no receiver; the only
 component is the exported activity that answers the two icon-pack intents.
 
-Tested on: not yet tested on a real TV.
+Tested on: Skyworth Android TV 10 (SWTV-20AE), with the launcher's icon_pack switch. Netflix, YouTube, Prime Video, Hotstar, Apple TV and Play Store matched.
