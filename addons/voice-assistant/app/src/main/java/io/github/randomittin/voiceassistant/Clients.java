@@ -13,6 +13,8 @@ final class Clients {
     static final String ANTHROPIC_URL = "https://api.anthropic.com/v1/messages";
     static final String OPENAI_CHAT_URL = "https://api.openai.com/v1/chat/completions";
     static final String OPENAI_TRANSCRIBE_URL = "https://api.openai.com/v1/audio/transcriptions";
+    static final String DEEPGRAM_URL =
+            "https://api.deepgram.com/v1/listen?model=nova-3&smart_format=true&detect_language=true";
     static final String ANTHROPIC_VERSION = "2023-06-01";
 
     private static final int CHAT_READ_TIMEOUT_MS = 45000;
@@ -24,7 +26,26 @@ final class Clients {
         this.settings = settings;
     }
 
+    /** The label of the service {@link #transcribe} will call, for error messages. */
+    String sttLabel() {
+        return SttProvider.label(settings.sttProvider()) + " speech-to-text";
+    }
+
     String transcribe(byte[] wav) throws ApiException {
+        if (SttProvider.DEEPGRAM.equals(settings.sttProvider())) {
+            return transcribeDeepgram(wav);
+        }
+        return transcribeOpenAi(wav);
+    }
+
+    private String transcribeDeepgram(byte[] wav) throws ApiException {
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Authorization", "Token " + settings.deepgramKey());
+        String reply = HttpJson.post(DEEPGRAM_URL, headers, "audio/wav", wav, TRANSCRIBE_READ_TIMEOUT_MS);
+        return ApiRequests.parseDeepgram(reply);
+    }
+
+    private String transcribeOpenAi(byte[] wav) throws ApiException {
         Multipart form = new Multipart("----voiceassistant" + System.nanoTime())
                 .field("model", settings.sttModel())
                 .field("response_format", "json")

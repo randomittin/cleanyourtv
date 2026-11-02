@@ -174,9 +174,9 @@ public class AssistActivity extends Activity {
 
     private void startListening() {
         stopEverything();
-        if (!settings.hasOpenAiKey()) {
-            fail("Speech-to-text needs an OpenAI API key. Press OK to type your question, "
-                    + "or Down to open settings.", State.TYPE_ONLY);
+        String missingKey = settings.sttMissingKeyMessage();
+        if (missingKey != null) {
+            fail(missingKey + " Press OK to type your question, or Down to open settings.", State.TYPE_ONLY);
             return;
         }
         if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
@@ -256,7 +256,7 @@ public class AssistActivity extends Activity {
                 Log.w(TAG, "transcription failed: " + e.kind + " " + e.httpStatus);
                 main.post(() -> {
                     if (gen == generation) {
-                        fail(ErrorText.describe("OpenAI speech-to-text", e) + " Press OK to try again.", State.ERROR);
+                        fail(ErrorText.describe(clients.sttLabel(), e) + " Press OK to try again.", State.ERROR);
                     }
                 });
             }

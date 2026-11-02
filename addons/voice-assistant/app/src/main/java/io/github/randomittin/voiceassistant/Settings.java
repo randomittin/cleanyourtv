@@ -16,6 +16,8 @@ final class Settings {
     private static final String FILE = "voice_assistant";
     private static final String K_ANTHROPIC = "anthropic_key";
     private static final String K_OPENAI = "openai_key";
+    private static final String K_DEEPGRAM = "deepgram_key";
+    private static final String K_STT = "stt";
     private static final String K_BRAIN = "brain";
     private static final String K_CLAUDE_MODEL = "claude_model";
     private static final String K_OPENAI_MODEL = "openai_model";
@@ -33,6 +35,38 @@ final class Settings {
 
     String openAiKey() {
         return prefs.getString(K_OPENAI, "");
+    }
+
+    String deepgramKey() {
+        return prefs.getString(K_DEEPGRAM, "");
+    }
+
+    void setDeepgramKey(String key) {
+        prefs.edit().putString(K_DEEPGRAM, key.trim()).apply();
+    }
+
+    boolean hasDeepgramKey() {
+        return !deepgramKey().isEmpty();
+    }
+
+    /** The saved choice: auto, deepgram or openai. */
+    String sttChoice() {
+        String value = prefs.getString(K_STT, SttProvider.AUTO);
+        return SttProvider.isChoice(value) ? value : SttProvider.AUTO;
+    }
+
+    void setSttChoice(String choice) {
+        prefs.edit().putString(K_STT, choice).apply();
+    }
+
+    /** The service that will really transcribe: deepgram or openai. */
+    String sttProvider() {
+        return SttProvider.resolve(sttChoice(), hasDeepgramKey());
+    }
+
+    /** Null when speech-to-text can run, else what to tell the user. */
+    String sttMissingKeyMessage() {
+        return SttProvider.missingKeyMessage(sttChoice(), hasDeepgramKey(), hasOpenAiKey());
     }
 
     void setAnthropicKey(String key) {

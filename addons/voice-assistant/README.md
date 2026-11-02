@@ -6,7 +6,8 @@ a compact dark panel over whatever is playing. For the [Clean Your TV](../../REA
 other Android TV home it is an ordinary app.
 
 Built for TVs where Google Assistant is disabled, so Android's own `SpeechRecognizer` has no service: the
-speech-to-text is an API call, not the system recognizer.
+speech-to-text is an API call, not the system recognizer. Pick the service with the **Speech-to-text**
+setting: `auto` (the default) uses Deepgram when its key is set and OpenAI otherwise, or force `deepgram` or `openai`.
 
 ![The overlay, drawn from the layout the app uses (not a photo of a TV)](screenshot.jpg)
 
@@ -15,7 +16,7 @@ speech-to-text is an API call, not the system recognizer.
 1. The panel opens and records at once: 16 kHz mono from `AudioSource.VOICE_RECOGNITION`, falling back to
    `MIC` when that source will not open or delivers only silence.
 2. It stops after about 1.2 s of silence, at 15 s, or when you press OK. The level meter shows what the mic hears.
-3. The WAV goes to OpenAI (`gpt-4o-mini-transcribe`), the text to the brain you chose, and the answer is shown
+3. The WAV goes to Deepgram (`nova-3`) or OpenAI (`gpt-4o-mini-transcribe`) for speech-to-text, the text to the brain you chose, and the answer is shown
    in large type and spoken with the TV's text-to-speech. It answers in one to three short sentences.
 4. The last 6 turns are kept while the panel is open, so follow-ups work. Closing it forgets them.
 
@@ -44,20 +45,21 @@ adb shell am start -n io.github.randomittin.voiceassistant/.AssistActivity
 Nothing is built in or committed: you bring your own API keys.
 
 - **On the TV:** press Down in the panel, or open the settings activity, and fill in the Anthropic key (Claude)
-  and the OpenAI key (speech-to-text, and ChatGPT). Keys are shown only as "set" or "not set".
+  the Deepgram key and/or the OpenAI key (ChatGPT, and speech-to-text when Deepgram is not used). You need one of the
+  two for speech-to-text; typed questions need neither. Keys are shown only as "set" or "not set".
 - **Over ADB** (no typing with a remote), only the extras you pass are written, and a confirmation screen shows
   what was saved without echoing any key:
 
 ```bash
 adb shell am start -n io.github.randomittin.voiceassistant/.SetupActivity \
-  --es anthropic_key "$ANTHROPIC_API_KEY" --es openai_key "$OPENAI_API_KEY" --es brain claude
+  --es anthropic_key "$ANTHROPIC_API_KEY" --es deepgram_key "$DEEPGRAM_API_KEY" --es stt auto --es brain claude
 ```
 
-Without extras, `.SetupActivity` just opens the settings screen. `brain` is `claude` or `chatgpt`. The keys pass
+Without extras, `.SetupActivity` just opens the settings screen. `openai_key` works the same way. `brain` is `claude` or `chatgpt`; `stt` is `auto`, `deepgram` or `openai`. The keys pass
 through the adb shell's command line, so they can show up in its history on the TV; use a key you can revoke.
 
-Without an OpenAI key the panel says speech-to-text needs one and offers a typed question instead (OK, then the
-TV's keyboard). Claude needs only the Anthropic key for typed questions.
+Without a Deepgram or an OpenAI key the panel says speech-to-text needs one and offers a typed question instead (OK, then the
+TV's keyboard). Claude needs only the Anthropic key for typed questions, and ChatGPT only the OpenAI key.
 
 Model ids are settings too:
 
@@ -65,12 +67,15 @@ Model ids are settings too:
 |---|---|
 | Claude model | `claude-haiku-5-5` |
 | ChatGPT model | `gpt-4o-mini` |
-| Speech-to-text model | `gpt-4o-mini-transcribe` |
+| Speech-to-text model (OpenAI) | `gpt-4o-mini-transcribe` |
+
+Deepgram is called as `POST https://api.deepgram.com/v1/listen?model=nova-3&smart_format=true&detect_language=true`
+with `Authorization: Token <key>` and the WAV as the body.
 
 ## Errors you may see
 
-A wrong key shows "rejected the API key (401)"; no network shows "No connection"; a slow API shows "took too
-long"; a rate limit or empty credit shows 429. A mic that delivers nothing shows "No audio from the remote mic"
+A wrong key shows "rejected the API key (401)"; an account out of credit shows 402 (Deepgram) or 429 (OpenAI); no network shows "No connection"; a slow API shows "took too
+long"; a rate limit shows 429. A mic that delivers nothing shows "No audio from the remote mic"
 with the source and level. Every recording logs its source and peak level for diagnosis:
 
 ```bash
@@ -82,9 +87,9 @@ adb logcat -s VoiceAssistant
 | Permission | Why |
 |---|---|
 | `RECORD_AUDIO` | Records your question from the remote's mic. Asked for the first time you use it; recording only runs while the panel is on screen. |
-| `INTERNET` | Sends the recording to OpenAI for speech-to-text, and the conversation text to Anthropic or OpenAI (whichever brain is chosen). |
+| `INTERNET` | Sends the recording to Deepgram or OpenAI (whichever speech-to-text is in use) for transcription, and the conversation text to Anthropic or OpenAI (whichever brain is chosen). |
 
-That is all. What is sent: the audio of one question to `api.openai.com`, and the last 6 turns of text to
+That is all. What is sent: the audio of one question to `api.deepgram.com` or `api.openai.com`, and the last 6 turns of text to
 `api.anthropic.com` or `api.openai.com`. No account, no telemetry, no ads, no background service. Audio is kept in
 memory only. Keys and settings stay in the app's own storage (backups are off). Using the APIs costs money on your
 own accounts.

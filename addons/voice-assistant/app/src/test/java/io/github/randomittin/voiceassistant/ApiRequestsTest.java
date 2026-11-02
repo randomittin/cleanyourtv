@@ -152,4 +152,44 @@ public class ApiRequestsTest {
                 new ApiException(ApiException.Kind.BAD_REQUEST, 404, "model: claude-x"));
         assertTrue(bad.contains("404") && bad.contains("model: claude-x"));
     }
+
+    @Test
+    public void parseDeepgramReadsFirstAlternativeOfFirstChannel() throws Exception {
+        String json = "{\"metadata\":{\"request_id\":\"x\"},\"results\":{\"channels\":[{\"detected_language\":\"en\","
+                + "\"alternatives\":[{\"transcript\":\"How tall is Everest?\",\"confidence\":0.99,\"words\":[]},"
+                + "{\"transcript\":\"other\"}]},{\"alternatives\":[{\"transcript\":\"second channel\"}]}]}}";
+        assertEquals("How tall is Everest?", ApiRequests.parseDeepgram(json));
+    }
+
+    @Test
+    public void parseDeepgramEmptyOrMalformedIsAnError() {
+        String[] bad = {
+            "{\"results\":{\"channels\":[{\"alternatives\":[{\"transcript\":\"\"}]}]}}",
+            "{\"results\":{\"channels\":[]}}",
+            "{\"results\":{\"channels\":[{\"alternatives\":[]}]}}",
+            "{\"no\":\"results\"}",
+            "not json"
+        };
+        for (String json : bad) {
+            try {
+                ApiRequests.parseDeepgram(json);
+                fail(json);
+            } catch (ApiException e) {
+                assertEquals(ApiException.Kind.EMPTY, e.kind);
+            }
+        }
+    }
+
+    @Test
+    public void deepgramErrorBodyAndPaymentStatus() {
+        assertEquals("Invalid credentials.", ApiRequests.errorMessage(
+                "{\"err_code\":\"INVALID_AUTH\",\"err_msg\":\"Invalid credentials.\",\"request_id\":\"r\"}"));
+        assertEquals(ApiException.Kind.PAYMENT, ApiException.kindForStatus(402));
+        String text = ErrorText.describe("Deepgram speech-to-text",
+                new ApiException(ApiException.Kind.PAYMENT, 402, ""));
+        assertTrue(text.contains("402") && text.contains("credit"));
+        String auth = ErrorText.describe("Deepgram speech-to-text",
+                new ApiException(ApiException.Kind.AUTH, 401, "Invalid credentials."));
+        assertTrue(auth.startsWith("Deepgram speech-to-text rejected the API key (401)"));
+    }
 }

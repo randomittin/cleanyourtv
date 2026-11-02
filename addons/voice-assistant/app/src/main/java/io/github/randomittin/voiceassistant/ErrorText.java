@@ -11,6 +11,8 @@ public final class ErrorText {
         switch (e.kind) {
             case AUTH:
                 return service + " rejected the API key (" + e.httpStatus + "). Check it in settings.";
+            case PAYMENT:
+                return service + " says the account is out of credit or needs payment (402).";
             case RATE_LIMIT:
                 return service + " is rate limiting or out of credit (429). Try again in a moment.";
             case SERVER:

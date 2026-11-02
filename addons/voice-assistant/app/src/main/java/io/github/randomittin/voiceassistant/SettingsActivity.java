@@ -59,9 +59,16 @@ public class SettingsActivity extends Activity {
             render();
         });
         row("Anthropic API key (Claude)", settings.hasAnthropicKey() ? "set" : "not set",
-                v -> editKey("Anthropic API key", true));
-        row("OpenAI API key (speech-to-text and ChatGPT)", settings.hasOpenAiKey() ? "set" : "not set",
-                v -> editKey("OpenAI API key", false));
+                v -> editKey("Anthropic API key", KeyKind.ANTHROPIC));
+        row("OpenAI API key (ChatGPT and speech-to-text)", settings.hasOpenAiKey() ? "set" : "not set",
+                v -> editKey("OpenAI API key", KeyKind.OPENAI));
+        row("Deepgram API key (speech-to-text)", settings.hasDeepgramKey() ? "set" : "not set",
+                v -> editKey("Deepgram API key", KeyKind.DEEPGRAM));
+        row("Speech-to-text", SttProvider.label(settings.sttChoice()) + " (using "
+                + SttProvider.label(settings.sttProvider()) + ", OK switches)", v -> {
+                    settings.setSttChoice(SttProvider.next(settings.sttChoice()));
+                    render();
+                });
         row("Claude model", settings.claudeModel(), v -> Ui.promptText(this, "Claude model id",
                 settings.claudeModel(), false, "Save", text -> {
                     settings.setClaudeModel(text);
@@ -81,12 +88,20 @@ public class SettingsActivity extends Activity {
         list.getChildAt(Math.min(2, list.getChildCount() - 1)).requestFocus();
     }
 
-    private void editKey(String title, boolean anthropic) {
+    private enum KeyKind { ANTHROPIC, OPENAI, DEEPGRAM }
+
+    private void editKey(String title, KeyKind kind) {
         Ui.promptText(this, title + " (empty clears it)", "", true, "Save", text -> {
-            if (anthropic) {
-                settings.setAnthropicKey(text);
-            } else {
-                settings.setOpenAiKey(text);
+            switch (kind) {
+                case ANTHROPIC:
+                    settings.setAnthropicKey(text);
+                    break;
+                case OPENAI:
+                    settings.setOpenAiKey(text);
+                    break;
+                default:
+                    settings.setDeepgramKey(text);
+                    break;
             }
             render();
         });

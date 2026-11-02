@@ -104,14 +104,38 @@ public final class ApiRequests {
         }
     }
 
-    /** The human message inside an API error body ({"error": {"message": "..."}}), or "" when absent. */
+    /** The transcript of a Deepgram prerecorded reply: results.channels[0].alternatives[0].transcript. */
+    public static String parseDeepgram(String json) throws ApiException {
+        try {
+            JSONArray channels = new JSONObject(json).getJSONObject("results").optJSONArray("channels");
+            String text = "";
+            if (channels != null && channels.length() > 0) {
+                JSONArray alternatives = channels.getJSONObject(0).optJSONArray("alternatives");
+                if (alternatives != null && alternatives.length() > 0) {
+                    text = alternatives.getJSONObject(0).optString("transcript");
+                }
+            }
+            return nonEmpty(text, "I did not catch any words.");
+        } catch (JSONException e) {
+            throw new ApiException(ApiException.Kind.EMPTY, 200, "Deepgram sent a reply this app cannot read.");
+        }
+    }
+
+    /**
+     * The human message inside an API error body: {"error": {"message": "..."}} (Anthropic, OpenAI) or
+     * {"err_code": "...", "err_msg": "..."} (Deepgram), or "" when absent.
+     */
     public static String errorMessage(String json) {
         if (json == null || json.isEmpty()) {
             return "";
         }
         try {
-            JSONObject error = new JSONObject(json).optJSONObject("error");
-            return error == null ? "" : error.optString("message");
+            JSONObject root = new JSONObject(json);
+            JSONObject error = root.optJSONObject("error");
+            if (error != null) {
+                return error.optString("message");
+            }
+            return root.optString("err_msg");
         } catch (JSONException e) {
             return "";
         }
