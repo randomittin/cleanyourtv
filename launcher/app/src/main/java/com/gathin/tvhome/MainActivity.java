@@ -94,7 +94,7 @@ import java.util.Set;
 /**
  * tvOS style home: black, a pinned dock row, an app grid, and one glass highlight that springs between tiles.
  */
-public class MainActivity extends Activity implements AppAdapter.TileListener {
+public class MainActivity extends Activity implements AppAdapter.TileListener, HomeHost {
     @Override
     protected void attachBaseContext(android.content.Context base) {
         super.attachBaseContext(LauncherLocale.wrap(base));   // locale
@@ -121,6 +121,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     private String liveTvPkg;
     /** Launcher settings' change count this Home was built with (see onResume). */
     private long settingsRevision;
+    /** Fork extensions (HomeExtensions); every event fans out through it. Null until onCreate has built it. */
+    private HomeExtensionRunner extensions;
     /** Idle time on Home before ClockActivity; 0 is off (config.xml, home_idle_clock_minutes). */
     private long idleClockMs;
     /** Back on Home opens ClockActivity (config.xml, back_opens_clock). */
@@ -446,6 +448,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             if (festive) updateWifiLabel();
             sky.update();
             wallpaperPlayer.update();
+            if (extensions != null) extensions.onMinute();
             handler.postDelayed(this, MINUTE_MS);
         }
     };
@@ -968,6 +971,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
                     .removeCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VPN)
                     .build(), vpnCallback);
         }
+        attachExtensions();
         // Not after recreate(): the launch intent survives it and would open the settings again.
         if (savedInstanceState == null && !openLauncherSettingsIfAsked(getIntent()) && !openLibraryIfAsked(getIntent())) {
             openInputsIfAsked(getIntent());
@@ -1148,6 +1152,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
                 handler.postDelayed(this::playPetalShower, 450);
             }
         }
+        if (extensions != null) extensions.onResume();
     }
 
     /** Launcher settings' change count (Config.SETTINGS_REVISION_KEY); onResume rebuilds Home when it moved. */
@@ -1306,6 +1311,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     protected void onPause() {
         super.onPause();
         resumed = false;
+        if (extensions != null) extensions.onPause();
         // No UP reaches a paused Home, so a vendor-key hold it saw go down would still open its app later.
         // Only Home's own share is dropped: a key service that saw the same DOWN keeps its hold.
         RemoteKeys.release(this);
@@ -1379,6 +1385,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        if (extensions != null) extensions.detachAll();
         RemoteKeys.release(this);
         cancelHoldOk();
         if (gameDay != null) gameDay.shutdown();
@@ -1426,6 +1433,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
      */
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
+        // Fork extensions see D-pad, centre and media keys (Back only for an open panel of theirs) while focus is in their own views.
+        if (extensions != null && extensions.onKey(event, event.getKeyCode(), getCurrentFocus())) return true;
         // Vendor keys (TCL Netflix button, 4062) never reach the key services, only the focused window, so their
         // "hold:" entries run here too or nowhere. Only while resumed: onPause releases Home's holds, and a DOWN
         // taken after that would arm one nothing releases.
@@ -1881,6 +1890,9 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             // Scroll just enough so the whole glass (not only the tile) is visible.
             revealRect.set(0, -(int) pad * 2, item.getWidth(), item.getHeight() + (int) pad);
             grid.requestChildRectangleOnScreen(item, revealRect, reducedMotion);
+        }
+        if (extensions != null && position >= 0 && position < adapter.appCount()) {
+            extensions.onTileFocused(position, adapter.packageAt(position));
         }
     }
 
@@ -2454,7 +2466,10 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             // One row: Up leaves for the top bar, Down has nowhere to go, and Left/Right walk the whole row,
             // stopping at its two ends (the default focus search scrolls the row to the next tile).
             if (keyCode == KeyEvent.KEYCODE_DPAD_UP) return false;
-            if (keyCode == KeyEvent.KEYCODE_DPAD_DOWN) return true;
+            if (keyCode == KeyEvent.KEYCODE_DPAD_DOWN) {
+                if (extensions != null) extensions.onTileVerticalKey(position, keyCode);
+                return true;
+            }
             boolean forward = rtlAppGrid ? keyCode == KeyEvent.KEYCODE_DPAD_LEFT : keyCode == KeyEvent.KEYCODE_DPAD_RIGHT;
             int last = adapter.focusablePosition(count - 1);
             if (forward && position >= last) {
@@ -2483,6 +2498,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             int lastRowStart = ((count - 1) / COLUMNS) * COLUMNS;
             if (position >= lastRowStart) {
                 if (adapter.isLibraryAt(count)) focusLibrary();
+                else if (extensions != null) extensions.onTileVerticalKey(position, keyCode);
                 return true;
             }
             target = Math.min(position + COLUMNS, count - 1);
@@ -3311,6 +3327,82 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         } catch (Exception e) {
             Toast.makeText(this, R.string.not_available, Toast.LENGTH_SHORT).show();
         }
+    }
+
+    // ---- fork extensions (HomeHost) ----------------------------------------------------------------
+
+    /** Slot height kept free for the shelf row while Continue watching or Recent apps is on (see attachExtensions). */
+    private static final int SHELF_SLOT_DP = 128;
+
+    /**
+     * Builds and attaches the fork's extensions. The shelf slot's height is reserved first (INVISIBLE, not GONE) when
+     * a shelf is enabled, so the grid is measured once and tiles do not resize when the row shows up later; it is
+     * released again if no extension put a view into the slot while attaching.
+     */
+    private void attachExtensions() {
+        ForkKeys keys = ForkKeys.load(this);
+        boolean shelf = keys.continueWatching || keys.recentApps;
+        ViewGroup shelfSlot = shelfSlot();
+        if (shelf) {
+            shelfSlot.getLayoutParams().height = (int) (SHELF_SLOT_DP * density);
+            shelfSlot.setVisibility(View.INVISIBLE);
+        }
+        ViewGroup bar = topButtons();
+        extensions = new HomeExtensionRunner(this, keys, HomeExtensions.create(keys), new HomeExtensionRunner.TopBar() {
+            @Override public int visibility() { return bar.getVisibility(); }
+            @Override public void setVisibility(int visibility) { bar.setVisibility(visibility); }
+        }, MainActivity::isFocusInside, (message, error) -> android.util.Log.w("TvHome.Ext", message, error));
+        extensions.attachAll();
+        if (shelf && shelfSlot.getChildCount() == 0) {
+            shelfSlot.getLayoutParams().height = ViewGroup.LayoutParams.WRAP_CONTENT;
+            shelfSlot.setVisibility(View.GONE);
+        }
+    }
+
+    /** Whether {@code focus} is {@code scope} or one of its descendants. */
+    private static boolean isFocusInside(View focus, View scope) {
+        for (View v = focus; v != null; ) {
+            if (v == scope) return true;
+            android.view.ViewParent parent = v.getParent();
+            v = parent instanceof View ? (View) parent : null;
+        }
+        return false;
+    }
+
+    @Override public Activity activity() { return this; }
+    @Override public ViewGroup root() { return root; }
+    @Override public ViewGroup npSlot() { return findViewById(R.id.npSlot); }
+    @Override public ViewGroup shelfSlot() { return findViewById(R.id.shelfSlot); }
+    @Override public ViewGroup topButtons() { return findViewById(R.id.topButtons); }
+    @Override public View lookButton() { return findViewById(R.id.btnLook); }
+    @Override public View gridView() { return grid; }
+    @Override public float density() { return density; }
+    @Override public boolean reducedMotion() { return reducedMotion; }
+    @Override public Handler handler() { return handler; }
+    @Override public ComponentName mediaSessionListener() { return new ComponentName(this, GuardRevival.class); }
+    @Override public void openIntent(Intent intent) { open(intent); }
+
+    @Override public void recreateHome() {
+        // The path Launcher settings use: onCreate re-reads the revision, so the rebuilt Home is not rebuilt again.
+        SharedPreferences choices = getSharedPreferences(Config.SETTINGS_NAME, MODE_PRIVATE);
+        choices.edit().putLong(Config.SETTINGS_REVISION_KEY, choices.getLong(Config.SETTINGS_REVISION_KEY, 0) + 1).apply();
+        recreate();
+    }
+
+    @Override public void focusGridTile() {
+        if (adapter.appCount() == 0) { firstTopButton().requestFocus(); return; }
+        focusTile(Math.max(0, Math.min(lastFocused, adapter.appCount() - 1)));
+    }
+
+    @Override public void showGlassPanel(View panel, View anchor, int widthDp) {
+        PopupWindow popup = glassPopup(panel, (int) (widthDp * density));
+        dropIn(popup, panel, anchor, getResources().getBoolean(R.bool.rtl_menu_bar) ? Gravity.START : Gravity.END);
+    }
+
+    @Override public void setContentInsetStart(int px) {
+        View column = findViewById(R.id.contentColumn);
+        int start = px > 0 ? px : (int) (56 * density);
+        column.setPaddingRelative(start, column.getPaddingTop(), column.getPaddingEnd(), column.getPaddingBottom());
     }
 
     private void open(Intent i) {

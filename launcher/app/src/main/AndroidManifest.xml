@@ -22,6 +22,14 @@
          this permission (protection level normal, so it is granted at install). Ignored on other TVs. -->
     <uses-permission android:name="yandex.tv.permission.ACCESS_TV_SOURCE" />
 
+    <!-- Fork extensions. INTERNET: poster art for the Continue-watching shelf (https only). READ_TV_LISTINGS: the
+         Watch Next and preview programs. PACKAGE_USAGE_STATS: the Recent-apps shelf, used only when the user grants
+         the appop. No new listener: Now Playing reuses the GuardRevival component below. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_TV_LISTINGS" />
+    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS"
+        tools:ignore="ProtectedPermissions" />
+
     <!-- Android 11+ package visibility: lets the launcher list the TV apps it shows as tiles, and the
          apps that declare a module card (docs/specs/card.md). -->
     <queries>

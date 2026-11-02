@@ -157,6 +157,7 @@
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/contentColumn"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
@@ -402,7 +403,27 @@
                 android:scrollbars="none"
                 android:descendantFocusability="afterDescendants" />
         </FrameLayout>
+
+        <!-- Fork extension slot (HomeHost.shelfSlot): a shelf row under the grid. GONE until an extension uses it. -->
+        <FrameLayout
+            android:id="@+id/shelfSlot"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clipChildren="false"
+            android:clipToPadding="false"
+            android:visibility="gone" />
     </LinearLayout>
+
+    <!-- Fork extension slot (HomeHost.npSlot): top centre, over the header's empty middle. -->
+    <FrameLayout
+        android:id="@+id/npSlot"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|center_horizontal"
+        android:layout_marginTop="22dp"
+        android:clipChildren="false"
+        android:clipToPadding="false"
+        android:visibility="gone" />
 
     <!-- The single floating glass highlight that springs between tiles. -->
     <com.gathin.tvhome.GlassView
