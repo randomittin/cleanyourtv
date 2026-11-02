@@ -393,6 +393,11 @@
     <!-- The focused dock app's name in large type above the dock. false keeps only the glow, which leaves room
          for bigger tiles when rows_below_dock is 2 or 3. -->
     <bool name="dock_title">true</bool>
+    <!-- How the dock_title name looks. text (the default) is large type above the dock. pill shows it at 16sp in a
+         small dark rounded pill directly above the focused dock tile, following focus, like a macOS dock tooltip.
+         Ignored on the cinematic shelf and when dock_title is false. Can also be set with "dock_title_style": "pill"
+         in a theme's config.json. -->
+    <string name="dock_title_style" translatable="false">text</string>
 
     <!-- Tiles per row in the grid; the dock always has this many slots. Tiles are 180dp wide at 4 columns and
          shrink to fit from 5 up (about 144dp at 5, 117dp at 6 on a 1080p TV). -->

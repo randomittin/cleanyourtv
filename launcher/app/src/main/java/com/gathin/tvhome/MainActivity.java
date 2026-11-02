@@ -147,6 +147,10 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     private GlassView glass;
     private View ambient;
     private TextView heroName;
+    /** dock_title_style pill: the name sits in a pill above the focused tile instead of at the left edge. */
+    private boolean heroPill;
+    /** The shelf's resting translationX: 0 at the left edge, or the shift that centres the pill on its tile. */
+    private float heroX;
     /** The top shelf: heroName, plus the cinematic shelf's "Last opened" line and dock position dots. */
     private View hero;
     private TextView heroMeta;
@@ -536,6 +540,9 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         // dock_title false: the name above the dock (and the cinematic lines under it) never shows; the glow
         // still follows the dock.
         if (!cfg.dockTitle) hero.setVisibility(View.GONE);
+        // The cinematic shelf has its own large name and lines, so the pill is for the plain shelf only.
+        heroPill = cfg.dockTitle && !cinematic && HeroPill.STYLE_PILL.equals(cfg.dockTitleStyle);
+        if (heroPill) setUpHeroPill();
         greeting = findViewById(R.id.greeting);
         clockBlock = findViewById(R.id.leftBlock);
         clockRefresh = new ClockRefresh(clockBlock);
@@ -1866,7 +1873,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
                 if (!animations || reducedMotion) grid.scrollBy(0, dy);
                 else grid.smoothScrollBy(0, dy);
             }
-            showHero(position, scroll ? r.top - dy : r.top);
+            showHero(position, scroll ? r.top - dy : r.top, r.exactCenterX());
         } else {
             // Below the dock (or in a plain grid) the glow follows the tile without the big name; letting it
             // fade out left the grid on plain black.
@@ -1901,10 +1908,11 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
 
     // ---- top shelf -------------------------------------------------------------------------------
 
-    private void showHero(int position, float dockTopInRoot) {
+    private void showHero(int position, float dockTopInRoot, float tileCenterX) {
         String label = adapter.labelAt(position);
         int color = adapter.ambientColorAt(position);
-        float y = dockTopInRoot - 14 * density - 26 * density - hero.getHeight();
+        float y = dockTopInRoot - (heroPill ? HeroPill.GAP_DP : 14 + 26) * density - hero.getHeight();
+        if (heroPill) heroX = pillShiftX(label, tileCenterX);
         boolean changed = !label.contentEquals(heroName.getText());
         if (cinematic && heroArtAlpha > 0f) showHeroArt(position);
 
@@ -1915,7 +1923,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             ambient.animate().cancel();
             fillHero(position, label);
             hero.setY(y);
-            hero.setTranslationX(0f);
+            hero.setTranslationX(heroX);
             hero.setAlpha(1f);
             if (ambientGlow) {
                 setAmbient(color);
@@ -1931,7 +1939,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             ambient.animate().cancel();
             fillHero(position, label);
             hero.setY(y);
-            hero.setTranslationX(0f);
+            hero.setTranslationX(heroX);
             hero.animate().alpha(1f).setDuration(260).start();
             if (ambientGlow) {
                 setAmbient(color);
@@ -1940,11 +1948,11 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             heroShown = true;
         } else if (changed) {
             if (advancedEffects) hero.animate().cancel();
-            hero.animate().alpha(0f).translationX(-12 * density).setDuration(120).withEndAction(() -> {
+            hero.animate().alpha(0f).translationX(heroX - 12 * density).setDuration(120).withEndAction(() -> {
                 fillHero(position, label);
                 hero.setY(y);
-                hero.setTranslationX(12 * density);
-                hero.animate().alpha(1f).translationX(0f).setDuration(200).start();
+                hero.setTranslationX(heroX + 12 * density);
+                hero.animate().alpha(1f).translationX(heroX).setDuration(200).start();
             }).start();
             if (ambientGlow && advancedEffects) {
                 transitionAmbient(color);
@@ -1960,6 +1968,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             }
         } else {
             hero.setY(y);
+            if (heroPill) hero.setTranslationX(heroX);
             // onPause cancels the fade-ins, and a second Home during one lands on the same tile, which starts none:
             // finish them, or the shelf and the glow stay dim until focus moves to another app.
             if (hero.getAlpha() < 1f) hero.animate().alpha(1f).setDuration(260).start();
@@ -1967,6 +1976,25 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
                 ambient.animate().alpha(1f).setDuration(600).start();
             }
         }
+    }
+
+    /** Dark rounded pill behind the name, 16sp, with the padding that makes it a pill. */
+    private void setUpHeroPill() {
+        GradientDrawable pill = new GradientDrawable();
+        pill.setColor(HeroPill.FILL_COLOR);
+        pill.setCornerRadius(HeroPill.CORNER_DP * density);
+        heroName.setBackground(pill);
+        heroName.setTextSize(TypedValue.COMPLEX_UNIT_SP, HeroPill.TEXT_SP);
+        heroName.setLetterSpacing(0f);
+        int padX = (int) (HeroPill.PAD_HORIZONTAL_DP * density), padY = (int) (HeroPill.PAD_VERTICAL_DP * density);
+        heroName.setPadding(padX, padY, padX, padY);
+    }
+
+    /** translationX that centres the pill, sized for {@code label}, over the tile, kept clear of the screen edges. */
+    private float pillShiftX(String label, float tileCenterX) {
+        float width = heroName.getPaint().measureText(label) + 2 * HeroPill.PAD_HORIZONTAL_DP * density;
+        float left = HeroPill.clampX(tileCenterX, width, root.getWidth(), HeroPill.EDGE_MARGIN_DP * density);
+        return left - hero.getLeft();
     }
 
     /** The shelf's text for this dock app: its name and, on the cinematic shelf, "Last opened" and the dots. */
