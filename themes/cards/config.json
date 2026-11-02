@@ -1,0 +1,19 @@
+{
+  "dock_apps": [
+    "com.netflix.ninja",
+    "com.google.android.youtube.tv",
+    "com.amazon.amazonvideo.livingroom",
+    "com.disney.disneyplus"
+  ],
+  "dock_row": false,
+  "columns": 4,
+  "uniform_tiles": true,
+  "always_show_names": true,
+  "dock_title": false,
+  "fade_rows": true,
+  "app_glow": true,
+  "ambient_glow": true,
+  "dock_band": false,
+  "background_color": "#07090F",
+  "icon_only_buttons": true
+}
