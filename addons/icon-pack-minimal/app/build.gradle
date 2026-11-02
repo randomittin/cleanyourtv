@@ -1,0 +1,41 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.gathin.iconpack.minimal'
+    compileSdk 34
+
+    defaultConfig {
+        // -PpackApplicationId=... builds a private pack that installs next to this one.
+        applicationId 'com.gathin.iconpack.minimal'
+        minSdk 26
+        targetSdk 34
+        versionCode 1
+        versionName '1.0'
+        if (project.hasProperty('packApplicationId')) {
+            applicationId project.property('packApplicationId')
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt')
+            // Sideloaded over ADB, never published.
+            signingConfig signingConfigs.debug
+        }
+    }
+
+    lint {
+        // The drawables are looked up by name from appfilter.xml by the launcher, never from code.
+        disable 'UnusedResources'
+        // Not an app to open: it has no screen, so no Leanback tile.
+        disable 'MissingLeanbackLauncher'
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}

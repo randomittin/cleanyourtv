@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item component="ComponentInfo{com.netflix.ninja/com.netflix.ninja.MainActivity}" drawable="ic_com_netflix_ninja" />
+    <item component="ComponentInfo{com.google.android.youtube.tv/com.google.android.apps.youtube.tv.activity.ShellActivity}" drawable="ic_com_google_android_youtube_tv" />
+    <item component="ComponentInfo{com.amazon.amazonvideo.livingroom/com.amazon.ignition.IgnitionActivity}" drawable="ic_com_amazon_amazonvideo_livingroom" />
+    <item component="ComponentInfo{com.disney.disneyplus/com.bamtechmedia.dominguez.main.MainActivity}" drawable="ic_com_disney_disneyplus" />
+    <item component="ComponentInfo{in.startv.hotstar/in.startv.hotstar.splash.SplashActivity}" drawable="ic_in_startv_hotstar" />
+    <item component="ComponentInfo{com.apple.atve.androidtv.appletv/com.apple.atve.androidtv.appletv.MainActivity}" drawable="ic_com_apple_atve_androidtv_appletv" />
+    <item component="ComponentInfo{com.spotify.tv.android/com.spotify.tv.android.SpotifyTVActivity}" drawable="ic_com_spotify_tv_android" />
+    <item component="ComponentInfo{com.plexapp.android/com.plexapp.plex.activities.tv17.MainActivity}" drawable="ic_com_plexapp_android" />
+    <item component="ComponentInfo{org.xbmc.kodi/org.xbmc.kodi.Splash}" drawable="ic_org_xbmc_kodi" />
+    <item component="ComponentInfo{org.videolan.vlc/org.videolan.vlc.StartActivity}" drawable="ic_org_videolan_vlc" />
+    <item component="ComponentInfo{com.android.vending/com.google.android.finsky.tvmainactivity.TvMainActivity}" drawable="ic_com_android_vending" />
+    <item component="ComponentInfo{com.android.tv.settings/com.android.tv.settings.MainSettings}" drawable="ic_com_android_tv_settings" />
+</resources>
