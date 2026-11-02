@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<lint>
+    <!-- English-only screens, built in code; the answers come back in whatever language you ask in. -->
+    <issue id="SetTextI18n" severity="ignore" />
+    <!-- A TV banner must be 320x180dp; the vector is a few paths and drawn once. -->
+    <issue id="VectorRaster" severity="ignore" />
+    <!-- An Android TV app is landscape only. -->
+    <issue id="DiscouragedApi" severity="ignore" />
+    <!-- allowBackup is off: the API keys must not leave the TV in a backup. -->
+    <issue id="DataExtractionRules" severity="ignore" />
+</lint>
