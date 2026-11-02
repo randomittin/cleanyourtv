@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="shelf_continue_watching" translatable="false">Continue watching</string>
+    <string name="shelf_recent_apps" translatable="false">Recent apps</string>
+</resources>
