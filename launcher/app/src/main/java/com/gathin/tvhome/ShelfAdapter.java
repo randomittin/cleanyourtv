@@ -13,7 +13,9 @@ import android.widget.TextView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /** The shelf's cards: poster (or app banner), title, progress bar and app badge. */
 final class ShelfAdapter extends RecyclerView.Adapter<ShelfAdapter.Holder> {
@@ -30,6 +32,8 @@ final class ShelfAdapter extends RecyclerView.Adapter<ShelfAdapter.Holder> {
     private final float density;
     private final boolean reducedMotion;
     private List<ShelfItem> items = new ArrayList<>();
+    /** Art keys (see ArtRetry) that arrived. A failure is never recorded, so it is retried on the next refresh. */
+    private final Set<String> loaded = new HashSet<>();
 
     ShelfAdapter(PosterLoader loader, float density, boolean reducedMotion, OnItem onItem) {
         this.loader = loader;
@@ -48,6 +52,13 @@ final class ShelfAdapter extends RecyclerView.Adapter<ShelfAdapter.Holder> {
         if (items.size() > before) notifyItemRangeInserted(before, items.size() - before);
         if (items.size() < before) notifyItemRangeRemoved(items.size(), before - items.size());
         return true;
+    }
+
+    /** Rebinds every card whose poster, banner or badge has not arrived (a load that failed offline, say). */
+    void retryMissing() {
+        for (int position : ArtRetry.missing(items, loaded, PosterLoader::isSupportedUri)) {
+            notifyItemChanged(position);
+        }
     }
 
     @Override public int getItemCount() {
@@ -75,14 +86,21 @@ final class ShelfAdapter extends RecyclerView.Adapter<ShelfAdapter.Holder> {
         }
         if (item.kind == ShelfItem.Kind.APP) {
             h.art = loader.loadAppBanner(item.packageName, (int) (CARD_W_DP * density), (int) (CARD_H_DP * density),
-                    bitmap -> h.poster.setImageBitmap(bitmap));
+                    bitmap -> {
+                        loaded.add(ArtRetry.artKey(item));
+                        h.poster.setImageBitmap(bitmap);
+                    });
             return;
         }
         if (PosterLoader.isSupportedUri(item.posterUri)) {
-            h.art = loader.loadPoster(item.posterUri, ART_MAX_W, ART_MAX_H, bitmap -> h.poster.setImageBitmap(bitmap));
+            h.art = loader.loadPoster(item.posterUri, ART_MAX_W, ART_MAX_H, bitmap -> {
+                loaded.add(ArtRetry.artKey(item));
+                h.poster.setImageBitmap(bitmap);
+            });
         }
         if (item.packageName != null) {
             h.badgeLoad = loader.loadAppIcon(item.packageName, (int) (BADGE_DP * density), bitmap -> {
+                loaded.add(ArtRetry.badgeKey(item));
                 h.badge.setImageBitmap(bitmap);
                 h.badge.setVisibility(View.VISIBLE);
             });

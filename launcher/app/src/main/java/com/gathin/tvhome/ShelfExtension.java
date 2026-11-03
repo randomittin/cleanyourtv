@@ -3,6 +3,8 @@ package com.gathin.tvhome;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.ConnectivityManager;
+import android.net.Network;
 import android.os.Handler;
 import android.util.Log;
 import android.view.Gravity;
@@ -47,6 +49,8 @@ final class ShelfExtension implements HomeExtension, ResumeAware, TileNavAware, 
     private ExecutorService reader;
     private int generation;
     private boolean attached;
+    private ConnectivityManager connectivity;
+    private ConnectivityManager.NetworkCallback networkCallback;
 
     @Override public void attach(HomeHost host, ForkKeys keys) {
         if (!keys.continueWatching && !keys.recentApps) return;
@@ -90,12 +94,40 @@ final class ShelfExtension implements HomeExtension, ResumeAware, TileNavAware, 
                 (int) ((SHELF_DP - LABEL_DP) * density)));
         slot.addView(root, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (int) (SHELF_DP * density)));
         attached = true;
+        watchNetwork();
+    }
+
+    /** One retry of missing art whenever a default network appears (Wi-Fi after boot); event-driven, no polling. */
+    private void watchNetwork() {
+        connectivity = (ConnectivityManager) ctx.getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (connectivity == null) return;
+        networkCallback = new ConnectivityManager.NetworkCallback() {
+            @Override public void onAvailable(Network network) {
+                host.handler().post(() -> {
+                    if (attached && shown()) adapter.retryMissing();
+                });
+            }
+        };
+        try {
+            connectivity.registerDefaultNetworkCallback(networkCallback);
+        } catch (RuntimeException e) {
+            Log.w(TAG, "network callback not registered: " + e);
+            networkCallback = null;
+        }
     }
 
     @Override public void detach() {
         if (!attached) return;
         attached = false;
         generation++;
+        if (connectivity != null && networkCallback != null) {
+            try {
+                connectivity.unregisterNetworkCallback(networkCallback);
+            } catch (RuntimeException ignored) {
+                // Already unregistered.
+            }
+            networkCallback = null;
+        }
         reader.shutdownNow();
         loader.shutdown();
         slot.removeView(root);
@@ -147,6 +179,7 @@ final class ShelfExtension implements HomeExtension, ResumeAware, TileNavAware, 
             return;
         }
         slot.setVisibility(View.VISIBLE);
+        if (!changed) adapter.retryMissing();
         if (hadFocus && changed) {
             final int target = Math.max(0, Math.min(focusedPosition, plan.items.size() - 1));
             row.post(() -> {
