@@ -76,6 +76,13 @@ final class LookExtension implements HomeExtension, ResumeAware, MinuteAware, Ke
         p.setText(R.string.look_title);
         p.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_look, 0, 0, 0);
         p.setNextFocusDownId(R.id.grid);
+        // Up and the outer edge go nowhere, like every other pill, so the focus finder cannot jump far below.
+        p.setOnKeyListener((v, keyCode, event) -> {
+            if (event.getAction() != KeyEvent.ACTION_DOWN) return false;
+            boolean rtl = v.getLayoutDirection() == View.LAYOUT_DIRECTION_RTL;
+            return keyCode == KeyEvent.KEYCODE_DPAD_UP
+                    || keyCode == (rtl ? KeyEvent.KEYCODE_DPAD_RIGHT : KeyEvent.KEYCODE_DPAD_LEFT);
+        });
         if (iconOnly(h)) {
             p.setContentDescription(p.getText());
             p.setText(null);

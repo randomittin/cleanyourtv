@@ -912,7 +912,9 @@ public class MainActivity extends Activity implements AppAdapter.TileListener, H
                 focusTile(singleRow ? lastFocused : lastFocused % COLUMNS);
                 return true;
             }
-            int firstButton = btnInputs.getVisibility() == View.VISIBLE ? R.id.btnInputs : firstTopButton().getId();
+            View lookPill = findViewById(R.id.btnLook);   // the fork's Look pill sits before every other pill
+            int firstButton = lookPill != null && lookPill.getVisibility() == View.VISIBLE ? R.id.btnLook
+                    : btnInputs.getVisibility() == View.VISIBLE ? R.id.btnInputs : firstTopButton().getId();
             int leftButton = rtlMenuBar ? R.id.btnSettings : firstButton;
             int rightButton = rtlMenuBar ? firstButton : R.id.btnSettings;
             if (keyCode == KeyEvent.KEYCODE_DPAD_LEFT) return v.getId() == leftButton;
